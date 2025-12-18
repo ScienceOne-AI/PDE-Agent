@@ -23,6 +23,8 @@
 
 In this work, we frame PDE solving as tool invocation via LLM-driven agents and introduce PDE-Agent, the first toolchain-augmented multiagent collaboration framework, inheriting the reasoning capacity of LLMs and the controllability of external tools and enabling automated PDE solving from natural language descriptions.
 
+<div align=center><img src="assets/PDE_Agent.png" width="98%" height="100%" /></div>
+
 PDE-Agent leverages the strengths of multi-agent and multi-tool collaboration through two key innovations: A Prog-Act framework with graph memory and A Resource-Pool integrated with a tool-parameter separation mechanism.
 
 
