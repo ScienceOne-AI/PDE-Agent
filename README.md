@@ -11,8 +11,7 @@
   - [🔧️ Installation](#4.1)
   - [🚀 Quick Start](#4.2)
 - [📊 Data Preparation](#5)
-- [📜 Eval](#6)
-- [📝️ Cite](#7)
+- [📝️ Cite](#6)
 
 ## 🆕 News
 
