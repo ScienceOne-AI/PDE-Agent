@@ -1,0 +1,57 @@
+You are an expert in scientific computing and Python programming. Your task is to convert a LaTeX-formatted PDE equation into a Python function that uses PyTorch (torch) for mathematical operations. The function should be compatible with the DeepXDE library for solving PDEs using neural networks.
+The function should:
+- Take `x` (a PyTorch tensor with shape [batch_size, D], where D is the total number of independent variables, which may include spatial coordinates (e.g., x, y, z) and/or time (t)) and `u` (the solution tensor) as inputs.
+- The derivative operation should be implemented using the dde.grad.jacobian() function and the dde.grad.hessian() function, which are used to solve the first-order derivative and the second-order derivative respectively. Their usage is as follows:
+    - dde.grad.jacobian(Y, X, i=0, j=1) means to find the first-order derivative of Y with respect to the j+1th column of X
+    - i and j in dde.grad.hessian(Y, X, i, j) represent the second-order derivative of Y with respect to the i+1th and j+1th columns of X, respectively. For example, dde.grad.hessian(Y, X, i=1, j=1) represents the second-order derivative of Y with respect to the second column of X.Generally speaking, the values ​​of i and j will be the same, because there are no mixed partial derivatives involved in PDE, and usually the second-order derivative is calculated for the same independent variable.
+- Use `torch` functions (e.g., torch.sin, torch.exp) for all mathematical operations.
+- Return the PDE residual (e.g., left_hand_side - right_hand_side), the name of the function must be `pde`.
+- Dynamically determine the variables and their indices based on the LaTeX equation (e.g., x, y, z, t).
+
+Please note:
+- Your response only needs to include executable Python code.
+- Comments are allowed in the code, but no explanations outside the code are allowed.
+- The libraries you can use include torch, deepxde (dde)
+- You do not need to include any import statements
+- There may be some unknown parameters or unknown functions in the partial differential equation. In this case, in addition to the PDE equation in LaTex format, there will also be values of unknown parameters and LaTex expressions of unknown functions. At this time, these values or functions need to be defined in the defined PDE residual.
+
+For example:
+    ### Example 1:
+    LaTeX input: '\\frac{{\\partial u}}{{\\partial t}} = \\frac{{\\partial^2 u}}{{\\partial x^2}} + \\sin(x)'
+
+    - Output:
+    ```python
+    def pde(x, u):
+        du_t = dde.grad.jacobian(u, x, i=0, j=1)# first-order derivative of u with respect to x
+        du_xx = dde.grad.hessian(u, x, i=0, j=0)# second-order derivative of u with respect to x
+        return [du_t - du_xx - torch.sin(x[:, 0:1]), ]
+    ```
+
+    ### Example 2:
+    input: '\\frac{{\\partial u}}{{\\partial t}}=\\alpha \\frac{{\\partial^2u}}{{\\partial x^2}}, where \\alpha=0.4'
+
+    - Output:
+    ```python
+    def pde(x, y):
+        alpha = 0.4
+        dy_t = dde.grad.jacobian(y, x, i=0, j=1)# first-order derivative of y with respect to t
+        dy_xx = dde.grad.hessian(y, x, i=0, j=0)# second-order derivative of y with respect to x
+        return [dy_t - alpha * dy_xx,]
+    ```
+
+    ### Example 3:
+    input: '\\frac{\\partial^2y}{\\partial t^2} + \\frac{\\partial^2y}{\\partial x^2} + y^2 = -x\\cos(t) + x^2\\cos^2(t)'
+    - Output:
+    ```python
+    def pde(x, y):
+        dy_tt = dde.grad.hessian(y, x, i=1, j=1)# second-order derivative of y with respect to t
+        dy_xx = dde.grad.hessian(y, x, i=0, j=0)# second-order derivative of y with respect to x
+        x, t = x[:, 0:1], x[:, 1:2]
+        return [dy_tt + dy_xx + y**2 - x*torch.cos(t) + x**2*torch.cos(t)**2, ]
+    ```
+
+Now, please complete the definition code of the PDE function according to the following LaTex format PDE equation:
+
+
+
+

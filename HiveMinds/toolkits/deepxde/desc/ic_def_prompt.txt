@@ -1,0 +1,128 @@
+You are an expert in Python programming and scientific computing, able to solve PDEs using the deepxde library and handle complex initial condition definitions.
+Now you need to complete the corresponding code snippet according to the description of the initial conditions in the PDE solution problem. The given code must start with ```python and end with ```.
+
+The functions you can use to define initial conditions are dde.icbc.IC() and dde.icbc.OperatorBC(). Their usage is as follows:
+- dde.icbc.IC() is used to define initial conditions without derivatives, that is, to directly specify the value or expression of the solution at the initial time without taking derivatives with respect to time. It includes the following parameters:
+    - geomtime: a spatiotemporal object deepxde.geometry.timedomain.GeometryXTime representing a spatial region and a time range
+    - func: initial condition function, which represents the value or expression of the solution at the initial time. It can be a defined function or a lambda expression. All mathematical operations should use functions in the numpy library, such as np.sin, np.cos, np.exp, etc.
+    - initial: initial time judgment function, returns a Boolean value to determine whether it is the initial time. Most of the time, it can be directly set to the following lambda expression:
+        ```python
+        lambda _, on_initial: on_initial
+        ```
+
+
+- dde.icbc.OperatorBC() is used to define initial conditions with derivatives, that is, to specify the value or expression of the derivative or higher-order derivative of the solution with respect to time at the initial moment. It includes the following parameters:
+    - geomtime: a spatiotemporal object deepxde.geometry.timedomain.GeometryXTime representing a spatial region and a time range
+    - func: initial condition function, which represents the value or expression of the derivative or higher-order derivative of the solution with respect to time at the initial moment. It can be a defined function or a lambda expression. All mathematical operations should use functions in the torch library, such as torch.sin, torch.cos, torch.exp, etc.
+    - initial: initial time judgment function, returns a Boolean value to determine whether it is the initial time. Most of the time, it can be directly set to the following lambda expression:
+        ```python
+        lambda _, on_initial: on_initial
+        ```
+
+In the code snippet for the initial condition definition, geomtime can be used directly without your need to define it. Initial can directly use the lambda expression mentioned above in most cases. However, func needs to be defined according to the specific description of the PDE initial condition.
+The definition of func is as follows:
+- For the dde.icbc.IC() function, please refer to the following tips for the definition of func:
+1. The input of func is X, which is a Numpy array of size N*D, where N is the number of sample points and D represents the space-time dimension, i.e. the spatial dimension plus the time dimension.
+2. The first column of X, X[:,0:1], represents the first spatial dimension x, the second column, X[:,1:2], represents the second spatial dimension y (if the PDE problem involves the second spatial dimension), and so on. The last column of X represents the time dimension. For the initial condition definition, since t=0, it can be ignored.
+3. The output of func is the expression calculated using the input X, which represents the value or expression of the solution of the PDE at the initial time. Note that all mathematical operations should use functions in the numpy library, such as np.sin, np.cos, np.exp, etc.
+
+Some examples are:
+### Example1:
+If a time-dependent one-dimensional PDE is in the range x \\in [-1, 1], the time range is [0,1], and the initial condition is u(x, 0) = 0, then func can be defined as follows:
+```python
+def func(X):
+    return 0
+```
+
+### Example2:
+If a time-dependent one-dimensional PDE is in the range x \\in [-1, 1], the time range is [0,1], and the initial condition is u(x, 0) = -\\cos(x), then func can be defined as follows:
+```python
+def func(X):
+    return -np.cos(X[:, 0:1])
+```
+
+### Example3:
+If a time-dependent two-dimensional PDE is in the rectangular range of x \\in [-1, 1], y \in [-1, 1], the time range is [0,1], and the initial condition is u(x, y, 0) = \\sin(x) * \\cos(y), then func can be defined as follows:
+```python
+def func(X):
+    return np.sin(X[:, 0:1]) * np.cos(X[:, 1:2])
+```
+
+- For the dde.icbc.OperatorBC() function, please refer to the following tips for the definition of func:
+1. The input of func is X, Y and X_numpy, which represent
+    - X: a tensor array of size N*D, where N is the number of sample points and D represents the spatiotemporal dimension, i.e. the spatial dimension plus the time dimension, which represents the input of the neural network defined later
+    - Y: A tensor array, representing the output of the neural network defined later, representing the solution of the PDE
+    - X_numpy: a numpy array of size N*D, where N is the number of sample points and D represents the spatiotemporal dimension, i.e. the spatial dimension plus the time dimension, just like X, but X_numpy is a numpy array. This parameter is generally not used and can be set to a placeholder '_'
+2. The first column of X, X[:,0:1], represents the first spatial dimension x, the second column, X[:,1:2], represents the second spatial dimension y (if the PDE problem involves the second spatial dimension), and so on. The last column of X represents the time dimension. For the initial condition definition, since t=0, it can be ignored.
+3. The output of func is an N*1 tensor array, which represents the residual expression of the solution of the PDE at the initial time with respect to the time derivative or high-order derivative. Note that all mathematical operations should use functions in the torch library, such as torch.sin, torch.cos, torch.exp, etc.
+4. The derivative operation should be implemented using the dde.grad.jacobian() function and the dde.grad.hessian() function, which are used to solve the first-order derivative and the second-order derivative respectively. Their usage is as follows:
+    - dde.grad.jacobian(Y, X, i=0, j=1) means to find the first-order derivative of Y with respect to the j+1th column of X
+    - i and j in dde.grad.hessian(Y, X, i, j) represent the second-order derivative of Y with respect to the i+1th and j+1th columns of X, respectively. For example, dde.grad.hessian(Y, X, i=1, j=1) represents the second-order derivative of Y with respect to the second column of X.
+
+Some examples are:
+### Example1:
+If a time-dependent one-dimensional PDE is in the range x \in [-1, 1], the time range is [0,1], and the initial condition is \\frac{{\\partial u}}{{\\partial t}}(x, 0) = 0, then func can be defined as follows:
+```python
+def func(X, Y, _):
+    # The second column of X represents the time dimension, so dde.grad.jacobian(Y, X, i=0, j=1) means taking the first-order derivative of Y with respect to the second column of X
+    return dde.grad.jacobian(Y, X, i=0, j=1)
+```
+
+### Example2:
+If a time-dependent one-dimensional PDE is in the range x \in [-1, 1], the time range is [0,1], and the initial condition is \\frac{{\\partial u}}{{\\partial t}}(x, 0) = \\cos(x), then func can be defined as follows:
+```python
+def func(X, Y, _):
+    # The second column of X represents the time dimension, so dde.grad.jacobian(Y, X, i=0, j=1) means taking the first-order derivative of Y with respect to the second column of X
+    return dde.grad.jacobian(Y, X, i=0, j=1) - torch.cos(X[:, 0:1])
+```
+
+### Example3:
+If a time-dependent two-dimensional PDE is in the rectangular range of x \in [-1, 1], y \in [-1, 1], the time range is [0,1], and the initial condition is \\frac{{\\partial^2 u}}{{\\partial t^2}}(x, y, 0) = \\sin(x) * \\cos(y), then func can be defined as follows:
+```python
+def func(X, Y, _):
+    # The third column of X represents the time dimension, so dde.grad.hessian(Y, X, i=2, j=2) represents the second-order derivative of Y with respect to the third column of X (i.e. time t).
+    return dde.grad.hessian(Y, X, i=2, j=2) - torch.sin(X[:, 0:1]) * torch.cos(X[:, 1:2])
+```
+
+
+You can follow the following tips to complete the writing of the complete code snippet defining the initial conditions:
+1. The libraries you can use include deepxde (dde), numpy (np), and torch (torch), but you do not need to import these libraries in the code snippet, you can directly use dde, np, and torch
+2. You need to define the func function first, and its definition can refer to the previous tips
+3. The initial function can directly use the lambda expression: `lambda _, on_initial: on_initial`.
+4. Finally, use the dde.icbc.IC() or dde.icbc.OperatorBC() function to define the initial conditions. The specific function to use depends on whether the initial conditions of the PDE are with or without derivatives.
+5. The naming of the initial condition object starts with ic1. If there are multiple initial conditions to be defined, the initial conditions should be named ic1, ic2, ic3, and so on.
+
+Here are a few complete examples of defining initial conditions:
+### Example1:
+If a time-dependent PDE is in the range x \in [-1, 1], the time range is [0,1], and the initial condition is u(x, 0) = 0, then the initial condition can be defined as follows:
+```python
+def func(X):
+    return 0
+initial = lambda _, on_initial: on_initial
+ic1 = dde.icbc.IC(geomtime, func, initial)
+```
+
+### Example2:
+If a time-dependent PDE is in the range x \in [-1, 1], the time range is [0,1], and the initial condition is u(x, 0) = -\\cos(x), then the initial condition can be defined as follows:
+```python
+def func(X):
+    return -np.cos(X[:, 0:1])
+initial = lambda _, on_initial: on_initial
+ic1 = dde.icbc.IC(geomtime, func, initial)
+```
+
+### Example3:
+If a time-dependent PDE is in the range x \in [-1, 1], the time range is [0,1], and the initial conditions are u(x, 0) = x and \\frac{{\\partial u}}{{\\partial t}}(x, 0) = \\cos(x), then the initial conditions can be defined as follows:
+```python
+def func1(X):
+    return X[:, 0:1]
+
+def func2(X, Y, _):
+    return dde.grad.jacobian(Y, X, i=0, j=1) - torch.cos(X[:, 0:1])
+initial = lambda _, on_initial: on_initial
+ic1 = dde.icbc.IC(geomtime, func1, initial)
+ic2 = dde.icbc.OperatorBC(geomtime, func2, initial)
+```
+
+Now please complete the initial condition definition code snippet according to the following description of the PDE initial condition:
+

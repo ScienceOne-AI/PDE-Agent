@@ -1,0 +1,271 @@
+[
+  {
+    "name": "define_pde",
+    "description": "Use the deepxde library function to define the PDE equation residual, return a pde function object function, and the corresponding PDE function code string",
+    "parameters":
+    {
+      "equation": {"type":"str", "description": "PDE equation expression in LaTex format. There cannot be unknown numbers or unknown functions in the expression."}
+    }
+  },
+  {
+    "name": "define_reference_solution",
+    "description": "Define the reference solution of PDE, return a reference solution function object function, and the corresponding reference solution definition code string",
+    "parameters":
+    {
+      "solution": {"type":"str", "description": "Reference solution expression in LaTex format. There cannot be unknown numbers or unknown functions in the expression."}
+    }
+  },
+  {
+    "name": "define_domain",
+    "description": "Defines the spatial and temporal extent of the PDE (if it is a time-dependent PDE), and returns a deepxde.geometry.timedomain.GeometryXTime object (if it is a time-dependent PDE) or a dde.geometry.Interval, dde.geometry.Rectangle, dde.geometry.Polygon, dde.geometry.Disk, dde.geometry.Ellipse, dde.geometry.Triangle, dde.geometry.Cuboid, dde.geometry.Sphere, dde.geometry.Hypercube, dde.geometry.Hypersphere object (if it is not time-dependent)",
+    "parameters":
+    {
+      "geom_type":
+      {
+        "type": "str",
+        "description": "The type of spatial region needs to be defined according to the specific spatial region, including Interval (one-dimensional interval), Rectangle (two-dimensional rectangle), Polygon (two-dimensional polygon), Disk (two-dimensional disk), Ellipse (two-dimensional ellipse), Triangle (two-dimensional triangle), Cuboid (three-dimensional cube), Sphere (three-dimensional sphere), Hypercube (high-dimensional hypercube), Hypersphere (high-dimensional hypersphere)"
+      },
+      "geom_range":
+      {
+        "type": "list",
+        "description": "The range of the spatial region, the parameter type is a list. If the spatial region type is Interval, the list contains two elements, the first element is the left endpoint, and the second element is the right endpoint; if the spatial region type is Rectangle, the list also contains two elements, the first element is the lower left corner coordinate, and the second element is the upper right corner coordinate; if the spatial region type is Polygon, the list contains multiple elements, each element is a two-dimensional coordinate in list format, and the polygonal region boundary can be obtained by connecting them in clockwise or counterclockwise order; if it is Disk, the list contains two elements, the first element is a list, used to represent the center coordinates of the circle, and the second element is the radius size"
+      },
+      "is_time_dependent":
+      {
+        "type": "bool",
+        "description": "Whether the PDE is time-dependent, if so, this parameter is set to True and the time range needs to be defined. The default is False"
+      },
+      "time_range":
+      {
+        "type": "list",
+        "description": "When is_time_dependent is True, you need to define the time range. The parameter type is a list containing two elements. The first element is the start time and the second element is the end time. The default is None."
+      }
+    }
+  },
+  {
+    "name": "define_initial_condition",
+    "description": "Define the initial conditions of PDE. Initial conditions need to be defined only when PDE is time-dependent. Return a list and the corresponding python code for defining the initial conditions. Each element in the list is a deepxde.icbc.IC object or a deepxde.icbc.OperatorBC object, representing the definition of different initial conditions.",
+    "parameters":
+    {
+      "geomtime":
+      {
+        "type": "deepxde.geometry.timedomain.GeometryXTime object",
+        "description": "The spatial and temporal scope of the PDE equation. If you need to define initial conditions to indicate that the PDE is time-dependent, then geomtime must be a deepxde.geometry.timedomain.GeometryXTime object."
+      },
+      "ic_description":
+      {
+        "type": "str",
+        "description": "Descriptive information related to the initial conditions in the PDE problem. Since this tool must be used to solve time-dependent PDE problems, the description information needs to state the spatial dimension and geometric range of the PDE equation, the time range, the value at the initial time or the value of the derivative. Mathematical expressions should be in LaTeX format."
+      }
+    }
+  },
+  {
+    "name": "define_boundary_condition",
+    "description": "Define the boundary conditions of the PDE equation, which can handle Dirichlet boundary conditions and Neumann boundary conditions. Returns a list and the corresponding Python code for defining boundary conditions. Each element in the list is a deepxde.icbc.DirichletBC object or a deepxde.icbc.NeumannBC object, representing the boundary conditions on different boundaries.",
+    "parameters":
+    {
+      "geomtime":
+      {
+        "type": "deepxde.geometry.timedomain.GeometryXTime object or dde.geometry.Interval, dde.geometry.Rectangle, dde.geometry.Polygon, dde.geometry.Disk, dde.geom etry.Ellipse, dde.geometry.Triangle, dde.geometry.Cuboid, dde.geometry.Sphere, dde.geometry.Hypercube, dde.geometry.Hypersphere objects (if not time dependent PDE)",
+        "description": "The spatial and temporal scope of the PDE equation (only has a temporal scope if it is time-dependent)"
+      },
+      "bc_description":
+      {
+        "type": "str",
+        "description": "Descriptive information related to boundary conditions in the PDE problem, including whether the PDE equation is time-dependent, the spatial dimensions involved, the geometric boundary range, the type of boundary conditions on different boundaries and the values on the boundaries (Dirichlet type) or the values of normal derivatives (Neumann type). Mathematical expressions should be in LaTeX format"
+      }
+    }
+  },
+  {
+    "name": "create_training_data",
+    "description": "Create the data needed for subsequent training of the network, returning a dde.data.pde.TimePDE object (if it is a time-dependent PDE) or a dde.data.pde.PDE object (if it is not a time-dependent PDE)",
+    "parameters":
+    {
+      "geomtime":
+      {
+        "type": "deepxde.geometry.timedomain.GeometryXTime object (if time dependent) or dde.geometry.Interval, dde.geometry.Rectangle, dde.geometry.Polygon, dde.geometry.Disk, dde.geometry.Ellipse, dde.geometry.Triangle, dde.geometry.Cuboid, dde.geometry.Sphere, dde.geometry.Hypercube, dde.geometry.Hypersphere object (if space dependent)",
+        "description": "The spatial and temporal extent of the PDE (if time-dependent)"
+      },
+      "pde_func":
+      {
+        "type":"function",
+        "description":"Define the PDE equation function object"
+      },
+      "num_domain":
+      {
+        "type": "int",
+        "description": "The number of sampling points inside the region. Please determine the number of sampling points inside the region based on your experience in using the deepxde library to solve PDE problems and the actual complexity of the problem. It is generally set to several thousand, such as 1000, 2000, 3000, etc."
+      },
+      "num_boundary":
+      {
+        "type": "int",
+        "description": "The number of sampling points on the boundary. Please determine the number of sampling points on the boundary based on your experience in using the deepxde library to solve PDE problems and the actual complexity of the problem."
+      },
+      "num_initial":
+      {
+        "type": "int",
+        "description": "The number of sampling points at the initial moment. Only when the PDE is time-dependent, the number of sampling points at the initial moment needs to be defined. Please determine the number of sampling points at the initial moment based on your experience in using the deepxde library to solve PDE problems and the actual complexity of the problem."
+      },
+      "num_test":
+      {
+        "type": "int",
+        "description": "The number of sampling points during the test. This only needs to be defined when a reference solution is defined. Adjust according to the actual situation. Generally, it is equivalent to num_domain. The default value is None."
+      },
+      "bc":
+      {
+        "type": "list",
+        "description": "A list of defined boundary condition objects. Each element in the list is a deepxde.icbc.DirichletBC object or a deepxde.icbc.NeumannBC object, representing the boundary conditions on different boundaries."
+      },
+      "ic":
+      {
+        "type": "list",
+        "description": "A list of defined initial condition objects. Each element in the list is a deepxde.icbc.IC object or a deepxde.icbc.OperatorBC object, representing the definition of different initial conditions. When the PDE is time-dependent, that is, is_time_dependent is True, it is necessary to define the initial condition object. The default is None"
+      },
+      "ref_func":
+      {
+        "type": "function",
+        "description": "Reference-solution function object (generated by a preceding step, if available); required only when a reference solution is specified, otherwise defaulting to None.",
+        "description_old": "The reference solution function object defined. It only needs to be defined when the reference solution is defined. The default value is None"
+      },
+      "is_time_dependent":
+      {
+        "type": "bool",
+        "description": "A boolean indicating whether the PDE is time-dependent. Defaults to False"
+      }
+    }
+  },
+  {
+    "name": "create_network",
+    "description": "Create a neural network to fit PDE and return a fully connected neural network deepxde.nn.pytorch.fnn.FNN object. In general, fully connected neural networks can solve most PDE problems.",
+    "parameters":
+    {
+      "input_dim":
+      {
+        "type": "int",
+        "description": "The input dimension of a neural network is equal to the spatial dimension plus the time dimension. The spatial dimension may be 1, 2, or 3 (depending on the spatial variable), and the time dimension may be 0 or 1 (depending on whether it depends on time)."
+      },
+      "output_dim":
+      {
+        "type": "int",
+        "description": "The output dimension of the neural network, the dimension of the dependent variable in the PDE equation, is determined by the PDE equation expression and may be 1, 2, or 3 dimensions, and is generally equal to 1"
+      },
+      "hidden_layers":
+      {
+        "type": "list",
+        "description": "The hidden layer or middle layer of the neural network. The length of the list indicates the number of hidden layers, and each element indicates the number of neurons in that layer. You can refer to [M]*N, where M is the number of neurons in each layer and N is the number of hidden layers. M is generally set to 32, 48, or 64, depending on the complexity of the problem and the amount of training data. N is adjusted based on the number of training data sampling points. If there is a lot of training data, it can be set to 6, and if there is less training data, it can be set to 3."
+      },
+      "activation":
+      {
+        "type": "str",
+        "description": "The activation function of the neural network, the default is \"tanh\""
+      },
+      "initializer":
+      {
+        "type": "str",
+        "description": "The initialization method of the neural network parameters, the default is \"Glorot uniform\""
+      }
+    }
+  },
+  {
+    "name": "train_model",
+    "description": "In the initial stage of training the model, the Adam optimizer is used for training, and the deepxde.model.Model object, deepxde.model.LossHistory object, and deepxde.model.TrainState object are returned, which are the trained model, the loss function value of the training process, and the training state information. This tool is used to quickly converge in the early stage of neural network training and find a better parameter initialization, which can be used as the pre-training stage for subsequent L-BFGS fine-tuning.",
+    "parameters":
+    {
+      "data":
+      {
+        "type": "deepxde.data.pde.TimePDE object 或者deepxde.data.pde.PDE object",
+        "description": "Defined training data"
+      },
+      "net":
+      {
+        "type": "deepxde.nn.pytorch.fnn.FNN object",
+        "description": "Fully connected neural network defined"
+      },
+      "optimizer":
+      {
+        "type": "str",
+        "description": "Optimization algorithm, default is \"adam\""
+      },
+      "lr":
+      {
+        "type": "float",
+        "description": "The learning rate during training, the default is 1e-3"
+      },
+      "iterations":
+      {
+        "type": "int",
+        "description": "The default number of training iterations is 15000. If the problem is complex, such as a complex PDE, you can set it to 20000 or even larger. If it is simple, you can set it to 10000."
+      },
+      "metrics":
+      {
+        "type": "list",
+        "description": "Evaluation indicators during training. It only needs to be defined when a reference solution is defined. In this case, it is set to [\"l2 relative error\"], that is, the elements in the list are strings l2 relative error. The default is None"
+      },
+      "resample":
+      {
+        "type": "bool",
+        "description": "Whether to resample data during training. Setting it to True can improve training accuracy and reduce overfitting. Generally, when PDE is difficult to solve, it can be set to True. The default value is False"
+      },
+      "period":
+      {
+        "type": "int",
+        "description": "When resample is True, define the resampling period, usually 10, 100 or 1000, the default is None"
+      }
+    }
+  },
+  {
+    "name": "train_model_LBFGS",
+    "description": "Refine a previously trained model using the L-BFGS optimizer to significantly improve solution accuracy by reducing loss after initial training when needed; returns the optimized deepxde.model.Model, training LossHistory, and final TrainState (requires previous trained model and cannot replace initial training).", 
+    "description_old": "Using the L-BFGS optimizer to refine the model can significantly improve the accuracy of the solution. It must be used after the train_model tool is used, that is, to further reduce the loss on the basis of Adam training. It is used when the accuracy of the solution needs to be further improved. Returns deepxde.model.Model object, deepxde.model.LossHistory object, deepxde.model.TrainState object, which are the trained model, the loss function value of the training process, and the training status information. Note that this tool cannot be used as the initial training stage and must be called after the train_model tool is used.",
+    "parameters":
+    {
+      "model":
+      {
+        "type": "dde.model.Model object",
+        "description": "Trained model"
+      },
+      "metrics":
+      {
+        "type": "list",
+        "description": "Evaluation metrics used during training; required only when a reference solution is provided. When specified, it must be a list of strings, [\"l2 relative error\"]. Defaults to None."
+      },
+      "resample":
+      {
+        "type": "bool",
+        "description": "Whether to resample data during training. Setting it to True can improve training accuracy and reduce overfitting. Generally, when PDE is difficult to solve, it can be set to True. The default value is False"
+      },
+      "period":
+      {
+        "type": "int",
+        "description": "When resample is True, define the resampling period, usually 10, 100 or 1000, the default is None"
+      }
+    }
+  },
+  {
+    "name": "visualize_and_save",
+    "description": "Visualize final training progress and save training data. When is_save is True, save the relevant data. If is_plot is True, return two matplotlib.figure.Figure objects: the training loss curve and the optimal model's solution plot.",
+    "parameters":
+    {
+      "loss_history":
+      {
+        "type": "deepxde.model.LossHistory object",
+        "description": "Loss history returned by the LBFGS optimizer if it is performed; otherwise the history produced by initial training."
+      },
+      "train_state":
+      {
+        "type": "deepxde.model.TrainState object",
+        "description": "Training status information returned by the LBFGS optimizer if it is performed; otherwise the status information produced by initial training."
+      },
+      "is_save":
+      {
+        "type": "bool",
+        "description": "If True, relevant data during training will be saved. Default is True"
+      },
+      "is_plot":
+      {
+        "type": "bool",
+        "description": "If True, visualize the training process. Default is True"
+      }
+    }
+  }
+]
