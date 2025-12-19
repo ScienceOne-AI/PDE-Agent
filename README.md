@@ -127,6 +127,8 @@ The data preparation work is ongoing, and we will update the processed dataset, 
 
 <h2 id="8">📝️  Cite</h2>
 
+If you find this work useful, please consider citing: 
+
 ```
 @misc{liu2025pdeagenttoolchainaugmentedmultiagentframework,
       title={PDE-Agent: A toolchain-augmented multi-agent framework for PDE solving}, 
