@@ -128,5 +128,13 @@ The data preparation work is ongoing, and we will update the processed dataset, 
 <h2 id="8">📝️  Cite</h2>
 
 ```
-@article{}
+@misc{liu2025pdeagenttoolchainaugmentedmultiagentframework,
+      title={PDE-Agent: A toolchain-augmented multi-agent framework for PDE solving}, 
+      author={Jianming Liu and Ren Zhu and Jian Xu and Kun Ding and Xu-Yao Zhang and Gaofeng Meng and Cheng-Lin Liu},
+      year={2025},
+      eprint={2512.16214},
+      archivePrefix={arXiv},
+      primaryClass={cs.AI},
+      url={https://arxiv.org/abs/2512.16214}, 
+}
 ```
