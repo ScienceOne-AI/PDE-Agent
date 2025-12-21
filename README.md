@@ -66,7 +66,7 @@ PDE-Agent leverages the strengths of multi-agent and multi-tool collaboration th
 
 
    ```bash
-   git clone https://github.com/xxxxxx.git
+   git clone git@github.com:ScienceOne-AI/PDE-Agent.git
    cd PDE-Agent
    ```
 
